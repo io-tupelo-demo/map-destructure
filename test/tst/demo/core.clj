@@ -5,7 +5,6 @@
   (:require
     [schema.core :as s]
     [tupelo.schema :as tsk]
-    [tupelo.string :as str]
     ))
 
 ;---------------------------------------------------------------------------------------------------
@@ -35,9 +34,9 @@
       (is= c nil))  ; missing values default to `nil`
 
     ; associative destructure
-    (let [{a   :a
-           b   :b
-           c   :c} m]
+    (let [{a :a
+           b :b
+           c :c} m]
       (is= a 1)
       (is= b 2)
       (is= c nil))  ; missing values default to `nil`
@@ -58,7 +57,7 @@
           c (:c m 7)]
       (is= a 1)
       (is= b 2)
-      (is= c 7)) ; use supplied default for missing value
+      (is= c 7))    ; use supplied default for missing value
 
     ; use `get` with default
     (let [a (get m :a 5)
@@ -66,7 +65,7 @@
           c (get m :c 7)]
       (is= a 1)
       (is= b 2)
-      (is= c 7)) ; use supplied default for missing value
+      (is= c 7))    ; use supplied default for missing value
 
     ; associative destructure with `:or` defaults
     (let [{a   :a
@@ -78,16 +77,16 @@
                 c 7}} m]
       (is= a 1)
       (is= b 2)
-      (is= c 7)) ; use supplied default for missing value
+      (is= c 7))    ; use supplied default for missing value
 
     ; `:keys` destructure with `:or` defaults
     (let [{:keys [a b c]
-           :or {a 5  ; default values from here
-                b 6
-                c 7}} m]
+           :or   {a 5 ; default values from here
+                  b 6
+                  c 7}} m]
       (is= a 1)
       (is= b 2)
-      (is= c 7))  ; missing values default to `nil`
+      (is= c 7))    ; missing values default to `nil`
 
     ;-----------------------------------------------------------------------------
     ; destructure with `:as` result => returns "input" map
@@ -95,51 +94,51 @@
     ;-------------------------------------------------------
     ; Without `:or` defaults
     (let [{:keys [a]
-           :as orig} m]
+           :as   orig} m]
       (is= a 1)
-      (is= orig m))  ; `:as` always yields "input" map
+      (is= orig m)) ; `:as` always yields "input" map
 
     (let [{:keys [a b]
-           :as orig} m]
+           :as   orig} m]
       (is= a 1)
       (is= b 2)
-      (is= orig m))  ; `:as` always yields "input" map
+      (is= orig m)) ; `:as` always yields "input" map
 
     (let [{:keys [a b c]
-           :as orig} m]
+           :as   orig} m]
       (is= a 1)
       (is= b 2)
       (is= c nil)
-      (is= orig m))  ; `:as` always yields "input" map
+      (is= orig m)) ; `:as` always yields "input" map
 
     ;-------------------------------------------------------
     ; With `:or` defaults
     (let [{:keys [a]
-           :or {a 5
-                b 6
-                c 7}
-           :as orig} m]
+           :or   {a 5
+                  b 6
+                  c 7}
+           :as   orig} m]
       (is= a 1)
-      (is= orig m))  ; `:as` always yields "input" map
+      (is= orig m)) ; `:as` always yields "input" map
 
-    (let [{:keys [a b ]
-           :or {a 5
-                b 6
-                c 7}
-           :as orig} m]
+    (let [{:keys [a b]
+           :or   {a 5
+                  b 6
+                  c 7}
+           :as   orig} m]
       (is= a 1)
       (is= b 2)
-      (is= orig m))  ; `:as` always yields "input" map
+      (is= orig m)) ; `:as` always yields "input" map
 
     (let [{:keys [a b c]
-           :or {a 5  ; default values from here
-                b 6
-                c 7}
-           :as orig} m]
+           :or   {a 5 ; default values from here
+                  b 6
+                  c 7}
+           :as   orig} m]
       (is= a 1)
       (is= b 2)
       (is= c 7)
-      (is= orig m))  ; `:as` always yields "input" map
+      (is= orig m)) ; `:as` always yields "input" map
 
     ;-----------------------------------------------------------------------------
     ; You COULD use `:or` defaults and `:as` result with simple associative destructuring
@@ -147,7 +146,7 @@
     (let [{a   :a
            b   :b
            c   :c
-           :or {a 5  ; default values from here
+           :or {a 5 ; default values from here
                 b 6
                 c 7}
            :as orig} m]
@@ -163,10 +162,10 @@
   "Destructure in `(let ...)` statement"
   [m :- tsk/KeyMap]
   (let [{:keys [a b c]
-         :or {a 5
-              b 6
-              c 7}
-         :as orig} m] ; `:as` result unneeded since have original function arg `m`
+         :or   {a 5
+                b 6
+                c 7}
+         :as   orig} m] ; `:as` result unneeded since have original function arg `m`
     (is= a 1)
     (is= b 2)
     (is= c 7)
@@ -175,10 +174,10 @@
 (s/defn g
   "Destructure in arg list"
   [{:keys [a b c]
-    :or {a 5
-         b 6
-         c 7}
-    :as orig}]      ; <= true purpose of `:as` result is to name original function arg
+    :or   {a 5
+           b 6
+           c 7}
+    :as   orig}]    ; <= true purpose of `:as` result is to name original function arg
   (is= a 1)
   (is= b 2)
   (is= c 7)
@@ -188,3 +187,36 @@
   (f {:a 1 :b 2})
   (g {:a 1 :b 2}))
 
+;---------------------------------------------------------------------------------------------------
+; ***** The BEST way to construct/destructure maps *****
+
+(verify
+  (let [m {:a 1 :b 2}]
+    (with-map-vals m [a b] ; simpler version of `:keys` destructuring
+      (is= a 1)
+      (is= b 2)
+
+      (let [M (vals->map a b)] ; create a keyword map from variables
+        (is= M m))) ; same as original
+
+    ; Safe against typos: throw Exception if missing variable
+    (throws?
+      (with-map-vals m [a b c]))))
+
+(s/defn h
+  "Best way to destructure args, including default values"
+  [m :- tsk/KeyMap]
+  (let [defaults {:a 5
+                  :b 6
+                  :c 7}
+        params   (glue defaults m)] ; like `(merge m1 m2)` but safer
+    (is= nil (:c m)) ; missing value is nil
+    (with-map-vals params [a b c]
+      (is= a 1)     ; override default value
+      (is= b nil)     ; default replaces missing value
+      (is= c 7)     ;
+      )))
+
+(verify
+  (h {:a 1 :b nil})
+  )
