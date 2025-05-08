@@ -1,15 +1,190 @@
 (ns tst.demo.core
-  (:use demo.core tupelo.core tupelo.test)
+  (:use demo.core
+        tupelo.core
+        tupelo.test)
   (:require
+    [schema.core :as s]
+    [tupelo.schema :as tsk]
     [tupelo.string :as str]
     ))
 
-(verify
-    (is= 5 (add2 2 3)) ; call a function from demo.core
-    (isnt= 99 (+ 2 3)) ; do a local calculation
-    (is (string? "hello")) ; call a predicate function & verify
+;---------------------------------------------------------------------------------------------------
+; Full documentation:  https://clojure.org/guides/destructuring
+;---------------------------------------------------------------------------------------------------
 
-    (throws? (/ 1 0))
-    (throws-not? (+ 2 3))
-    )
+(verify
+  ; We want to extract values from a simple map
+  (let [m {:a 1 :b 2}]
+    ;-----------------------------------------------------------------------------
+    ; ***** BEWARE of typos in keyword, or you get `nil` results! *****
+
+    ; Use keyword as a function
+    (let [a (:a m)
+          b (:b m)
+          c (:c m)]
+      (is= a 1)
+      (is= b 2)
+      (is= c nil))  ; missing values default to `nil`
+
+    ; use `get`
+    (let [a (get m :a)
+          b (get m :b)
+          c (get m :c)]
+      (is= a 1)
+      (is= b 2)
+      (is= c nil))  ; missing values default to `nil`
+
+    ; associative destructure
+    (let [{a   :a
+           b   :b
+           c   :c} m]
+      (is= a 1)
+      (is= b 2)
+      (is= c nil))  ; missing values default to `nil`
+
+    ; `:keys` destructure
+    (let [{:keys [a b c]} m]
+      (is= a 1)
+      (is= b 2)
+      (is= c nil))  ; missing values default to `nil`
+
+    ;-----------------------------------------------------------------------------
+    ; Extract with default value for missing keywords
+    ; ***** BEWARE of typos in keyword, or you get the default value! *****
+    ;
+    ; Use keyword as a function with default values
+    (let [a (:a m 5)
+          b (:b m 6)
+          c (:c m 7)]
+      (is= a 1)
+      (is= b 2)
+      (is= c 7)) ; use supplied default for missing value
+
+    ; use `get` with default
+    (let [a (get m :a 5)
+          b (get m :b 6)
+          c (get m :c 7)]
+      (is= a 1)
+      (is= b 2)
+      (is= c 7)) ; use supplied default for missing value
+
+    ; associative destructure with `:or` defaults
+    (let [{a   :a
+           b   :b
+           c   :c
+           ; vvv default values are from the `:or` part
+           :or {a 5
+                b 6
+                c 7}} m]
+      (is= a 1)
+      (is= b 2)
+      (is= c 7)) ; use supplied default for missing value
+
+    ; `:keys` destructure with `:or` defaults
+    (let [{:keys [a b c]
+           :or {a 5  ; default values from here
+                b 6
+                c 7}} m]
+      (is= a 1)
+      (is= b 2)
+      (is= c 7))  ; missing values default to `nil`
+
+    ;-----------------------------------------------------------------------------
+    ; destructure with `:as` result => returns "input" map
+
+    ;-------------------------------------------------------
+    ; Without `:or` defaults
+    (let [{:keys [a]
+           :as orig} m]
+      (is= a 1)
+      (is= orig m))  ; `:as` always yields "input" map
+
+    (let [{:keys [a b]
+           :as orig} m]
+      (is= a 1)
+      (is= b 2)
+      (is= orig m))  ; `:as` always yields "input" map
+
+    (let [{:keys [a b c]
+           :as orig} m]
+      (is= a 1)
+      (is= b 2)
+      (is= c nil)
+      (is= orig m))  ; `:as` always yields "input" map
+
+    ;-------------------------------------------------------
+    ; With `:or` defaults
+    (let [{:keys [a]
+           :or {a 5
+                b 6
+                c 7}
+           :as orig} m]
+      (is= a 1)
+      (is= orig m))  ; `:as` always yields "input" map
+
+    (let [{:keys [a b ]
+           :or {a 5
+                b 6
+                c 7}
+           :as orig} m]
+      (is= a 1)
+      (is= b 2)
+      (is= orig m))  ; `:as` always yields "input" map
+
+    (let [{:keys [a b c]
+           :or {a 5  ; default values from here
+                b 6
+                c 7}
+           :as orig} m]
+      (is= a 1)
+      (is= b 2)
+      (is= c 7)
+      (is= orig m))  ; `:as` always yields "input" map
+
+    ;-----------------------------------------------------------------------------
+    ; You COULD use `:or` defaults and `:as` result with simple associative destructuring
+    ; if you wanted.
+    (let [{a   :a
+           b   :b
+           c   :c
+           :or {a 5  ; default values from here
+                b 6
+                c 7}
+           :as orig} m]
+      (is= a 1)
+      (is= b 2)
+      (is= c 7)
+      (is= orig m))))
+
+;---------------------------------------------------------------------------------------------------
+; Desctucturing for function calls
+
+(s/defn f
+  "Destructure in `(let ...)` statement"
+  [m :- tsk/KeyMap]
+  (let [{:keys [a b c]
+         :or {a 5
+              b 6
+              c 7}
+         :as orig} m] ; `:as` result unneeded since have original function arg `m`
+    (is= a 1)
+    (is= b 2)
+    (is= c 7)
+    (is= orig m)))
+
+(s/defn g
+  "Destructure in arg list"
+  [{:keys [a b c]
+    :or {a 5
+         b 6
+         c 7}
+    :as orig}]      ; <= true purpose of `:as` result is to name original function arg
+  (is= a 1)
+  (is= b 2)
+  (is= c 7)
+  (is= orig {:a 1 :b 2})) ; `m` arg does not exist, need literal value
+
+(verify
+  (f {:a 1 :b 2})
+  (g {:a 1 :b 2}))
 
