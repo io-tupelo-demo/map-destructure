@@ -199,9 +199,12 @@
       (let [M (vals->map a b)] ; create a keyword map from variables
         (is= M m))) ; same as original
 
-    ; Safe against typos: throw Exception if missing variable
-    (throws?
-      (with-map-vals m [a b c]))))
+    (throws-not?    ; `:a` and `:b` exist in map => normal flow
+      (with-map-vals m [a b]
+        (is= a 1)
+        (is= b 2)))
+    (throws?        ; Safe against typos & missing values: throw Exception due to `c`
+      (with-map-vals m [a c]))))
 
 (s/defn h
   "Best way to destructure args, including default values"
@@ -213,8 +216,8 @@
     (is= nil (:c m)) ; missing value is nil
     (with-map-vals params [a b c]
       (is= a 1)     ; override default value
-      (is= b nil)     ; default replaces missing value
-      (is= c 7)     ;
+      (is= b nil)   ; explicit nil input overrides default value
+      (is= c 7)     ; missing value replaced with default
       )))
 
 (verify
