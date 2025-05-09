@@ -21,7 +21,13 @@ from the https://github.com/cloojure/tupelo[Tupelo Clojure] library:
 - `(vals->map a b c)`
 - `(with-map-vals m [a b c] ...)`
 
-== How to User This Project
+== Source code for unit tests
+
+Just review the live unit test code from
+
+`test/tst/demo/core.clj`
+
+== How to Use This Project
 
 To use this project, we assume you have already installed Java, Clojure, and Leiningen, and `git`.
 
@@ -68,7 +74,7 @@ Clojure CLI version 1.12.0.1530
 
 == Running Unit Tests - Plain
 
-I use the alias `ct` for "clojure-test" and `ctr` fr "clojure-test-refresh". You can copy that or just cut/paste
+I use the alias `ct` for "clojure-test". You can copy that or just cut/paste
 the actual commands echoed below.
 
 With the alias:
