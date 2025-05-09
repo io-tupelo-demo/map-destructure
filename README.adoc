@@ -27,6 +27,26 @@ Just review the live unit test code from
 
 `test/tst/demo/core.clj`
 
+== Recommended way to construct and destructure Clojure maps
+
+The following is straight from the unit tests, using two features of the
+https://github.com/cloojure/tupelo[Tupelo Library]
+
+```clojure
+(let [m {:a 1 :b 2}] ; sample map
+
+  ; destructure values `a` and `b` from map `m`
+  (with-map-vals m [a b]
+    (is= a 1) ; verify
+    (is= b 2) ; verify
+
+    ; create keyword map M from variables
+    (let [M (vals->map a b)]
+      (is= M m)))) ; verify
+```
+
+
+
 == How to Use This Project
 
 To use this project, we assume you have already installed Java, Clojure, and Leiningen, and `git`.

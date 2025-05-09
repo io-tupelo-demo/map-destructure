@@ -223,3 +223,19 @@
 (verify
   (h {:a 1 :b nil})
   )
+
+; create a map with default values
+(verify
+  ; set up default values
+  (let [defaults {:a 5
+                  :b 6
+                  :c 7}]
+
+    ; use local & default values to create final result
+    (let [a      1
+          b      2
+          result (glue defaults (vals->map a b))]
+
+      (is= result {:a 1
+                   :b 2
+                   :c 7}))))
