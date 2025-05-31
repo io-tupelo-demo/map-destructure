@@ -1,11 +1,7 @@
-(ns tst.demo.fn-args-destructure
+(ns tst.demo.fn-args
   (:use demo.core
         tupelo.core
-        tupelo.test)
-  (:require
-    [schema.core :as s]
-    [tupelo.schema :as tsk]
-    ))
+        tupelo.test))
 
 ;---------------------------------------------------------------------------------------------------
 ; Full documentation:  https://clojure.org/guides/destructuring
