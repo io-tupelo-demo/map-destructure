@@ -1,5 +1,7 @@
 (ns tst.demo.sequence-destructure
-  (:use demo.core tupelo.core tupelo.test))
+  (:use demo.core
+        tupelo.core
+        tupelo.test))
 
 ;---------------------------------------------------------------------------------------------------
 ; Full documentation:  https://clojure.org/guides/destructuring
@@ -60,3 +62,16 @@
     (is= [a b others]
       [1 2 [3 4 5]])
     ))
+
+; alternate syntax  using (vals->map ...)
+(verify
+  (let [[a b c] x2]
+    (is= (vals->map a b c)
+      {:a 1 :b 2 :c nil}))
+
+  (let [[a b & others] x2]
+    (is= (vals->map a b others)
+      {:a 1 :b 2 :others nil}))
+
+  )
+
