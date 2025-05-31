@@ -1,7 +1,5 @@
-(ns tst.demo.core
-  (:use demo.core
-        tupelo.core
-        tupelo.test)
+(ns tst.demo.map-destructure
+  (:use demo.core tupelo.core tupelo.test)
   (:require
     [schema.core :as s]
     [tupelo.schema :as tsk]

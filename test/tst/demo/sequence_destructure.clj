@@ -1,7 +1,5 @@
 (ns tst.demo.sequence-destructure
-  (:use demo.core
-        tupelo.core
-        tupelo.test))
+  (:use demo.core tupelo.core tupelo.test))
 
 ;---------------------------------------------------------------------------------------------------
 ; Full documentation:  https://clojure.org/guides/destructuring
