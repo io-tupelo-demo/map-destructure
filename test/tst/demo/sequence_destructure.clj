@@ -15,33 +15,50 @@
 (def x5 [1 2 3 4 5])
 
 ; Sequential destructuring in a `let` form does not throw an exception for
-; insufficient number of supplied args.
+; few supplied args or too many. Result is either `nil` placeholder values,
+; or dropped values,  respectively.
 (verify
-  (let [[a b c d e] x0]
-    (is= [nil nil nil nil nil] [a b c d e]))
-  (let [[a b c d e] x1]
-    (is= [1 nil nil nil nil] [a b c d e]))
-  (let [[a b c d e] x2]
-    (is= [1 2 nil nil nil] [a b c d e]))
-  (let [[a b c d e] x3]
-    (is= [1 2 3 nil nil] [a b c d e]))
-  (let [[a b c d e] x4]
-    (is= [1 2 3 4 nil] [a b c d e]))
-  (let [[a b c d e] x5]
-    (is= [1 2 3 4 5] [a b c d e])))
+  (let [[a b c] x0] ; too few items => nil values
+    (is= [nil nil nil] [a b c]))
+
+  (let [[a b c] x1] ; too few items => nil values
+    (is= [1 nil nil] [a b c]))
+
+  (let [[a b c] x2] ; too few items => nil values
+    (is= [1 2 nil] [a b c]))
+
+  (let [[a b c] x3] ; just right number of items
+    (is= [1 2 3] [a b c]))
+
+  (let [[a b c] x4] ; too many items => extras dropped
+    (is= [1 2 3] [a b c]))
+
+  (let [[a b c] x5] ; too many items => extras dropped
+    (is= [1 2 3] [a b c])))
 
 ; number of named args = 2
 (verify
-  (let [[a b & others] x0]
-    (is= [nil nil nil] [a b others])) ; less than num named args
-  (let [[a b & others] x1]
-    (is= [1 nil nil] [a b others])) ; less than num named args
-  (let [[a b & others] x2]
-    (is= [1 2 nil] [a b others])) ; all num named args
-  (let [[a b & others] x3]
-    (is= [1 2 [3]] [a b others])) ; more than num named args args
-  (let [[a b & others] x4]
-    (is= [1 2 [3 4]] [a b others])) ; more than num named args args
-  (let [[a b & others] x5]
-    (is= [1 2 [3 4 5]] [a b others]) ; more than num named args args
+  (let [[a b & others] x0] ; less than num named args
+    (is= [a b others]
+      [nil nil nil]))
+
+  (let [[a b & others] x1] ; less than num named args
+    (is= [a b others]
+      [1 nil nil]))
+
+  (let [[a b & others] x2] ; all num named args
+    (is= [a b others]
+      [1 2 nil]))   ; NOTE: `others` is nil here, not empty vector
+
+  (let [[a b & others] x3] ; more than num named args
+    (is= [a b others]
+      [1 2 [3]]))
+
+  (let [[a b & others] x4] ; more than num named args
+    (is= [a b others]
+      [1 2 [3 4]]))
+
+  (let [[a b & others] x5] ; more than num named args
+    (is= [a b others]
+      [1 2 [3 4 5]])
     ))
