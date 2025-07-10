@@ -65,13 +65,21 @@
 
 ; alternate syntax  using (vals->map ...)
 (verify
+  ; sequence of 2 vals
   (let [[a b c] x2]
     (is= (vals->map a b c)
       {:a 1 :b 2 :c nil}))
-
   (let [[a b & others] x2]
     (is= (vals->map a b others)
       {:a 1 :b 2 :others nil}))
+
+  ; sequence of 4 vals
+  (let [[a b c] x4]
+    (is= (vals->map a b c)
+      {:a 1 :b 2 :c 3 }))
+  (let [[a b & others] x4]
+    (is= (vals->map a b others)
+      {:a 1 :b 2 :others [3 4]}))
 
   )
 

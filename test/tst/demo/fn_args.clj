@@ -7,11 +7,13 @@
 ; Full documentation:  https://clojure.org/guides/destructuring
 ;---------------------------------------------------------------------------------------------------
 
+;---------------------------------------------------------------------------------------------------
 (defn f0 [] :dummy) ; 0-arg function
 (defn f1 [a] (vals->map a)) ; 1-arg function
 (defn f2 [a b] (vals->map a b)) ; 2-arg function
 (defn f3 [a b c] (vals->map a b c)) ; 3-arg function
 
+; Without rest args, the function call must exactly match the fn declaration
 (verify
   (is= (f0) :dummy) ; just right args
   (throws? (f0 1))  ; too many args
@@ -33,11 +35,15 @@
   (throws? (f3 1 2 3 4)) ; too many args
   )
 
+;---------------------------------------------------------------------------------------------------
 (defn f0r [& others] (vals->map others)) ; 0-arg function + rest args
 (defn f1r [a & others] (vals->map a others)) ; 1-arg function + rest args
 (defn f2r [a b & others] (vals->map a b others)) ; 2-arg function + rest args
 (defn f3r [a b c & others] (vals->map a b c others)) ; 3-arg function + rest args
 
+; With rest args, the function call must have at least as many args as the fn declaration.
+; Extra args go into the "rest" sequence.
+;
 ; NOTE that when there are no rest args, `others` is set to `nil`
 ; and is never the empty vector `[]`
 (verify
@@ -64,18 +70,19 @@
   (is= (f3r 1 2 3 4) {:a 1 :b 2 :c 3 :others [4]}) ; more than min args
   (is= (f3r 1 2 3 4 5) {:a 1 :b 2 :c 3 :others [4 5]}) ; more than min args
 
+  ;---------------------------------------------------------------------------------------------------
   ; Note: the type of the rest args value fits both "seq" and "sequential".
-  ; It compares equal to any other "seq" with the same values
   (let [result (f2r 1 2 3 4)]
     (with-map-vals result [a b others]
       (is= a 1)
       (is= b 2)
 
+      ; rest args value compares equal to any other "seq" with the same values
       (is= others [3 4]) ; vector
       (is= others (list 3 4)) ; list
       (is= others '(3 4)) ; list using "reader macro" syntax
 
-      (is= (type others) clojure.lang.ArraySeq) ; detailed type
+      (is= (type others) clojure.lang.ArraySeq) ; exact type
       (is (seq? others)) ; it is a "seq"
       (is (sequential? others)) ; it is "seqential"
 
